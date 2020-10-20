@@ -1,0 +1,41 @@
+version: '3'
+
+networks: 
+    outside:
+        external: true
+
+services: 
+    zookeeper:
+        image: wurstmeister/zookeeper
+        container_name: zookeeper
+        ports:
+            - "2181:2181"
+        networks: 
+            - default
+            - outside
+    kafka:
+        image: wurstmeister/kafka
+        ports:
+            - "9092:9092"
+        environment: 
+            KAFKA_ADVERTISED_HOST_NAME: localhost
+            KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+            KAFKA_CREATE_TOPICS: "test:1:1"
+        depends_on: 
+            - zookeeper
+        networks: 
+            - default
+            - outside
+    server:
+        image: node:14.13.1-alpine3.12
+        command: npm run dev
+        build: .
+        working_dir: /home/node/app
+        volumes: 
+            - $PWD:/home/node/app
+        ports:
+            - "8080:8080"
+            - "9092"
+        networks: 
+            - default
+            - outside
