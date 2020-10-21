@@ -10,7 +10,7 @@ const server = app().listen(port, () => {
 import kafka from 'kafka-node';
 
 const consumer = new kafka.ConsumerGroupStream({
-    kafkaHost: 'localhost:9092',
+    kafkaHost: '192.168.0.3:9092',
     groupId: 'test',
     fromOffset: 'latest',
     batch: undefined,
@@ -25,8 +25,8 @@ const consumer = new kafka.ConsumerGroupStream({
     migrateRolling: true,
     maxTickMessages: 800,
     fetchMinBytes: 1,
-    fetchMaxBytes: 10 * 1024
-}, 'test')
+    fetchMaxBytes: 10 * 1024,
+}, 'testt')
 
 consumer.on('data', (chunk) => {
     console.log(chunk);
