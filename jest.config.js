@@ -1,3 +1,5 @@
+const rstram = require('range-stream');
+
 module.exports = {
     "roots": [
         "<rootDir>/src"
