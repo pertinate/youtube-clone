@@ -6,6 +6,7 @@ import rStream from 'range-stream'
 import streamBuffer from 'stream-buffers';
 import download from 'download.js';
 import { WriteStream } from 'tty';
+import { redisClient } from '../redis';
 
 const router = express.Router();
 
@@ -22,8 +23,21 @@ router.get('/video', async (request, response) => {
         }
     });
 
-    const fileSize = parseInt(result.headers.get('content-length'), 10);
+    // redisClient.set('trap-remix.mp4', (await result.buffer()).toString('binary'))
+
+    let videoBuffer = new Buffer(await new Promise((resolve, reject) => {
+        redisClient.get('trap-remix.mp4', (error, reply) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve(reply);
+            }
+        })
+    }), 'binary')
+
+    const fileSize = videoBuffer.length;
     const range = request.headers.range;
+    
     if (range) {
         console.log('RANGE')
         const positions = range.replace(/bytes=/, "").split('-');
@@ -40,7 +54,7 @@ router.get('/video', async (request, response) => {
         }
 
         response.writeHead(206, head);
-        var fileBytes = (await result.buffer()).copyWithin(0, start, end)
+        var fileBytes = videoBuffer.copyWithin(0, start, end)
 
         Readable.from(fileBytes).pipe(response);
     } else {

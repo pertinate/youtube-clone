@@ -1,11 +1,38 @@
 import http from 'http';
 import app from './express/app';
+import { redisClient } from './redis';
+import ffmpeg from 'fluent-ffmpeg'
 
 const port = process.env.PORT || 8060;
 
 const server = app().listen(port, () => {
     console.log(`Server online on port: ${port}`)
 })
+
+redisClient.on('connect', () => {
+    console.log('Redis Connected')
+});
+
+; (
+    async () => {
+        try {
+            const vid = ffmpeg({ source: '/home/pertinate/fileserver/trap-remix.mp4' });
+            // vid.ffprobe()
+            console.log(JSON.stringify(vid, null, '\t'))
+            console.log(vid)
+        } catch (error) {
+            console.error(error);
+        }
+    }
+)();
+
+// redisClient.hmset('trap-remix.mp4', {
+//     binaryRanges: '0-12345,12345-25567',
+//     '0': 'mybinary',
+//     '12345': 'mybinary',
+//     '25567': 'mybinary'
+// })
+
 
 
 // import kafka from 'kafka-node';
